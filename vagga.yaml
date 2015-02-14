@@ -1,25 +1,24 @@
 containers:
-  alpine:
-    setup:
-    - !Alpine v3.1
-    - !BuildDeps [make, gcc, musl-dev, pcre-dev, openssl-dev, zlib-dev,
-      ncurses-dev, readline-dev, curl, perl]
-    - !Sh |
-        set -ex
-        cd /tmp
-        wget http://openresty.org/download/ngx_openresty-1.7.7.2.tar.gz
-        gunzip -c ngx_openresty-1.7.7.2.tar.gz | tar xvf -
-        cd ngx_openresty-1.7.7.2
-        echo "==> Patching NginX..."
-        { for i in /work/*.patch; do echo "$i"; patch -p0 < "$i"; done }
-        ./configure
-        make && make install
-        
-        
-
+    alpine:
+        setup:
+        - !Env
+          VERSION: "ngx_openresty-1.7.7.2"
+        - !Alpine v3.1
+        - !BuildDeps [
+            make, gcc, musl-dev, pcre-dev, openssl-dev, zlib-dev, ncurses-dev,
+            readline-dev, curl, perl]
+        - !Sh |
+            set -ex
+            cd /tmp
+            wget http://openresty.org/download/${VERSION}.tar.gz
+            gunzip -c ${VERSION}.tar.gz | tar xvf -
+            cd ${VERSION}
+            { for i in /work/*.patch; do echo "$i"; patch -p0 < "$i"; done }
+            ./configure
+            make && make install
 
 commands:
-  sh: !Command
-    description: Run bash shell inside the container
-    container: alpine
-    run: /bin/sh
+    sh: !Command
+        description: Run shell inside the container
+        container: alpine
+        run: /bin/sh
