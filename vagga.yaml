@@ -1,21 +1,18 @@
 containers:
     alpine:
         setup:
-        - !Env
-          VERSION: "ngx_openresty-1.7.7.2"
         - !Alpine v3.1
         - !BuildDeps [
             make, gcc, musl-dev, pcre-dev, openssl-dev, zlib-dev, ncurses-dev,
             readline-dev, curl, perl]
-        - !Sh |
-            set -ex
-            cd /tmp
-            wget http://openresty.org/download/${VERSION}.tar.gz
-            gunzip -c ${VERSION}.tar.gz | tar xvf -
-            cd ${VERSION}
+        - !Depends "musl-crypt-fix.patch"
+        - !TarInstall
+          url: http://openresty.org/download/ngx_openresty-1.7.7.2.tar.gz
+          script: |
             { for i in /work/*.patch; do echo "$i"; patch -p0 < "$i"; done }
             ./configure
             make && make install
+
 
 commands:
     sh: !Command
